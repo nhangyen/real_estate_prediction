@@ -1,0 +1,7 @@
+flask
+pyspark
+pymongo
+kafka-python
+selenium
+beautifulsoup4
+requests
