@@ -28,29 +28,29 @@ spark = SparkSession.builder \
 
 df = spark.read.format("mongo").load()
 
-# district_indexer = StringIndexer(
-#     inputCol="district",
-#     outputCol="district_index",
-#     handleInvalid="keep"
-# )
+district_indexer = StringIndexer(
+    inputCol="district",
+    outputCol="district_index",
+    handleInvalid="keep"
+)
 
-# district_encoder = OneHotEncoder(
-#     inputCols=["district_index"],
-#     outputCols=["district_encoded"]
-# )
-# indexed_df = district_indexer.fit(df).transform(df)
-# encoded_df = district_encoder.fit(indexed_df).transform(indexed_df)
+district_encoder = OneHotEncoder(
+    inputCols=["district_index"],
+    outputCols=["district_encoded"]
+)
+indexed_df = district_indexer.fit(df).transform(df)
+encoded_df = district_encoder.fit(indexed_df).transform(indexed_df)
 
 
 
 # selected_features = ["area", "distance_to_hoan_kiem", "price",'bedroom','bathroom']
 assembler = VectorAssembler(
     # inputCols=["area", "distance_to_hoan_kiem", "floor","district_encoded"],
-    inputCols=["area", "distance_to_hoan_kiem", "bedroom","bathroom"],
+    inputCols=["area", "distance_to_hoan_kiem", "bedroom","bathroom","district_encoded"],
     outputCol="features"
 )
-# vector_df = assembler.transform(encoded_df)
-vector_df = assembler.transform(df)
+vector_df = assembler.transform(encoded_df)
+# vector_df = assembler.transform(df)
 
 
 # scaler = StandardScaler(inputCol="features", outputCol="scaled_features")
@@ -60,21 +60,21 @@ vector_df = assembler.transform(df)
 # Khởi tạo mô hình Linear Regression
 
 
-# lr = LinearRegression(
-#     featuresCol="features", 
-#     labelCol="price", 
-#     maxIter=100, 
-#     regParam=0.01, 
-#     elasticNetParam=0.5
-# )
-
-rf = RandomForestRegressor(
-    featuresCol="features",
-    labelCol="price",
-    numTrees=100,
-    maxDepth=10,
-    seed=42
+lr = LinearRegression(
+    featuresCol="features", 
+    labelCol="price", 
+    maxIter=100, 
+    regParam=0.01, 
+    elasticNetParam=0.5
 )
+
+# rf = RandomForestRegressor(
+#     featuresCol="features",
+#     labelCol="price",
+#     numTrees=100,
+#     maxDepth=10,
+#     seed=42
+# )
 # gbt = GBTRegressor(
 #     featuresCol="features",
 #     labelCol="price",
@@ -83,19 +83,19 @@ rf = RandomForestRegressor(
 #     seed=42
 # )
 
-dt = DecisionTreeRegressor(
-    featuresCol="features",
-    labelCol="price",
-    maxDepth=5,
-    seed=42
-)
+# dt = DecisionTreeRegressor(
+#     featuresCol="features",
+#     labelCol="price",
+#     maxDepth=5,
+#     seed=42
+# )
 
 train_data, test_data = vector_df.randomSplit([0.8, 0.2], seed=42)
 # train_data, test_data = scaled_df.randomSplit([0.8, 0.2], seed=42)
 
 # Train mô hình
 # model = gbt.fit(train_data)
-model = dt.fit(train_data)
+model = lr.fit(train_data)
 
 # Đánh giá mô hình
 predictions = model.transform(test_data)

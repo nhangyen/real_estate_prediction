@@ -42,10 +42,6 @@ print(f"Model loaded successfully: {len(coefficients)} coefficients, intercept={
 def index():
     return render_template('index.html')
 
-@app2.route('/login')
-def login():
-    return render_template('login.html')
-
 @app2.route('/predict', methods=['GET', 'POST'])
 def predict():
     if request.method == 'GET':
