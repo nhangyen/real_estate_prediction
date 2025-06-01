@@ -5,15 +5,17 @@ from pyspark.ml.feature import VectorAssembler
 from pyspark.sql.functions import lit
 from pyspark.sql.types import DoubleType, StringType, StructType, StructField
 import os
-from pymongo import MongoClient
+import requests
+from math import radians, sin, cos, sqrt, atan2
+# from pymongo import MongoClient
 import re
 import clean_data
 app = Flask(__name__)
 
 # Kết nối MongoDB
-client = MongoClient('mongodb://localhost:27017/')
-db = client['real_estate']
-history_collection = db['prediction_history']
+# client = MongoClient('mongodb://localhost:27017/')
+# db = client['real_estate']
+# history_collection = db['prediction_history']
 
 # Khởi tạo Spark Session
 spark = SparkSession.builder \
@@ -41,13 +43,12 @@ def predict():
     else:
         # Nhận dữ liệu từ form
         data = request.get_json()
-        address = float(data['address'])
+        address = str(data['address'])
         area = float(data['area'])
         bedroom = float(data['bedroom'])
         bathroom = float(data['bathroom'])
         
-        # Trích xuất quận và tính khoảng cách đến trung tâm
-        #distance_to_hoan_kiem = clean_data.get_distance(address)
+        distance_to_hoan_kiem = float(get_distance(address))
         
         # Tạo DataFrame từ dữ liệu đầu vào
         schema = StructType([
@@ -60,7 +61,7 @@ def predict():
         data_row = [
             (
                 float(area),
-                float(address),
+                float(distance_to_hoan_kiem),
                 float(bedroom),
                 float(bathroom)
             )
@@ -94,6 +95,42 @@ def predict():
             "status": "success",
             "predicted_price": predicted_price,
         })
+
+
+hoan_kiem_lat = 21.0285  # Latitude
+hoan_kiem_lon = 105.8542  # Longitude
+
+# Hàm geocoding sử dụng OpenStreetMap Nominatim
+def geocode(addr):
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={addr}"
+    headers = {
+        "User-Agent": "MyRealEstateApp/1.0 (your.email@example.com)"  # Thay bằng thông tin của bạn
+    }
+    
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={addr}"
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    if data:
+        return float(data[0]['lat']), float(data[0]['lon'])
+    return None
+
+# Hàm tính khoảng cách Haversine
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Bán kính Trái Đất (km)
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
+
+def get_distance(addr):
+    coords = geocode(addr)
+    if coords:
+        lat, lon = coords
+        distance = haversine(lat, lon, hoan_kiem_lat, hoan_kiem_lon)
+        return distance
+    return None
+
 
 if __name__ == '__main__':
     app.run(debug=True)

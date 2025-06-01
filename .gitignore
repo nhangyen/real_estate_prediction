@@ -1,0 +1,84 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.log
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VSCode
+.vscode/
+.history/
+
+# PyCharm/IntelliJ
+.idea/
+*.iml
+
+# Environment
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spark/Parquet/Temp
+spark-temp/
+*.parquet
+*.snappy
+*.crc
+.DS_Store
+
+# Data/Output/Models
+output/
+models/
+data/
+*.db
+*.sqlite3
+
+# Kafka/Zookeeper logs
+*.log
+*.pid
+
+# Hadoop
+hadoop/
+
+# MongoDB dump
+dump/
+
+# System
+Thumbs.db
+desktop.ini
+
+# HTTP Client
+httpRequests/
+
+# JetBrains Data Sources
+dataSources/
+dataSources.local.xml
+shelf/
+workspace.xml
+
+# Misc
+*.bak
+*.swp
+*.swo
+*.tmp
+*.temp
