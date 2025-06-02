@@ -5,11 +5,16 @@ from selenium.webdriver.edge.options import Options
 import time
 import random
 import re
+import json
 from datetime import datetime
 from pymongo import MongoClient
+from kafka_pipeline.kafka_config import create_kafka_producer
+
 client = MongoClient('mongodb://localhost:27017/')
 db = client['real_estate']
 collection = db['properties2']
+
+producer = create_kafka_producer()
 
 def clean_price(price_text):
     """Convert price text to numeric value in billions"""
@@ -113,9 +118,7 @@ def get_data():
                         bathroom_span = card.find_element(By.CSS_SELECTOR, '[aria-label*="WC"]')
                         bathrooms = int(re.search(r'\d+', bathroom_span.text).group())
                     except:
-                        bathrooms = extract_room_count(config, 'bathroom')
-
-                    # Extract date
+                        bathrooms = extract_room_count(config, 'bathroom')                    # Extract date
                     try:
                         date_element = card.find_element(By.CLASS_NAME, 're__card-published-info-published-at')
                         date = date_element.get_attribute('aria-label')
@@ -132,11 +135,22 @@ def get_data():
                         'bathroom': bathrooms,
                         # 'crawled_at': datetime.now()
                     }
+                    
+                    # Send to Kafka first
                     try:
-                        collection.insert_one(item)
-                        print(f"Saved to MongoDB:{item['project_name']}")
-                    except Exception as mongo_error:
-                        print(f"Error:{mongo_error}")
+                        producer.send(
+                            'real_estate_data', 
+                            value=item
+                        )
+                        print(f"Sent to Kafka: {item['project_name']}")
+                    except Exception as kafka_error:
+                        print(f"Error sending to Kafka: {kafka_error}")
+                        # Fallback to MongoDB if Kafka fails
+                        try:
+                            collection.insert_one(item)
+                            print(f"Saved to MongoDB (fallback): {item['project_name']}")
+                        except Exception as mongo_error:
+                            print(f"Error saving to MongoDB: {mongo_error}")
 
                     # print("\nExtracted property:")
                     # print(f"Project: {item['project_name']}")
@@ -148,8 +162,7 @@ def get_data():
                     # print(f"Date: {item['date']}")
                     # print("-" * 50)
 
-                    data.append(item)
-
+                    data.append(item)                
                 except Exception as e:
                     print(f"Error processing card: {str(e)}")
                     continue
@@ -158,6 +171,7 @@ def get_data():
 
     finally:
         driver.quit()
+        client.close()
 
     return data
 

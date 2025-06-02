@@ -1,7 +1,7 @@
 import requests
 import re
 from bs4 import BeautifulSoup
-from kafka_config import create_kafka_producer
+from kafka_pipeline.kafka_config import create_kafka_producer
 import json
 import time
 import random
@@ -10,7 +10,7 @@ from datetime import datetime
 from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017/')
 db = client['real_estate']
-collection = db['properties']
+collection = db['properties2']
 
 producer = create_kafka_producer()
 
