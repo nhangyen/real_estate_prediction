@@ -1,0 +1,5 @@
+{
+  "coefficients": [281306762.77694696, -995556273.9527894, -2604044624.7724676, 3554403764.9239063],
+  "intercept": -1907745509.7131596,
+  "feature_names": ["area", "distance_to_hoan_kiem", "bedroom", "bathroom"]
+}

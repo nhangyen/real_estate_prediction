@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# IDE/Editor specific
+.idea/
+.vscode/
+*.iml
+*.code-workspace
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+env/
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+
+# Logs
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Docker
+dockerfile
+.dockerignore
+
+# Other
+*.bak
+*.swp

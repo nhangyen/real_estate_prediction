@@ -47,9 +47,9 @@ spark-temp/
 .DS_Store
 
 # Data/Output/Models
-output/
-models/
-data/
+# output/
+# models/
+# data/
 *.db
 *.sqlite3
 

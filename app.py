@@ -9,7 +9,7 @@ import requests
 from math import radians, sin, cos, sqrt, atan2
 # from pymongo import MongoClient
 import re
-import clean_data
+import data_processing.clean_data as clean_data
 app = Flask(__name__)
 
 # Kết nối MongoDB
