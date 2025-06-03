@@ -3,7 +3,7 @@
 Dự án này là một hệ thống ETL cho phép thu thập, xử lý và dự đoán giá bất động sản dựa trên các đặc điểm như địa chỉ (để tính khoảng cách đến một điểm trung tâm), diện tích, số phòng ngủ và số phòng tắm. Dự án bao gồm các thành phần để thu thập dữ liệu, làm sạch dữ liệu, huấn luyện mô hình học máy với PySpark, xử lý quy trình với Apache Airflow và cung cấp API cũng như giao diện người dùng thông qua Flask.
 
 Kiến trúc hệ thống:
-![alt text](image.png)
+![image](https://github.com/user-attachments/assets/28abd719-09cc-41de-8f6f-ad5f17612a21)
 
 ## Các tính năng chính
 *   Tự động thu thập dữ liệu bất động sản từ các nguồn web và lưu vào MongoDB để phục vụ cho pipeline xử lý và huấn luyện mô hình.
