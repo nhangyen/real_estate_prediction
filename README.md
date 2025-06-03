@@ -1,16 +1,17 @@
 # Dự án Dự đoán Giá Bất động sản
 
-Dự án này là một ứng dụng web cho phép dự đoán giá bất động sản dựa trên các đặc điểm như địa chỉ (để tính khoảng cách đến một điểm trung tâm), diện tích, số phòng ngủ và số phòng tắm. Dự án bao gồm các thành phần để thu thập dữ liệu, làm sạch dữ liệu, huấn luyện mô hình học máy với PySpark, và cung cấp API cũng như giao diện người dùng thông qua Flask.
+Dự án này là một hệ thống ETL cho phép thu thập, xử lý và dự đoán giá bất động sản dựa trên các đặc điểm như địa chỉ (để tính khoảng cách đến một điểm trung tâm), diện tích, số phòng ngủ và số phòng tắm. Dự án bao gồm các thành phần để thu thập dữ liệu, làm sạch dữ liệu, huấn luyện mô hình học máy với PySpark, xử lý quy trình với Apache Airflow và cung cấp API cũng như giao diện người dùng thông qua Flask.
+
+Kiến trúc hệ thống:
+![alt text](image.png)
 
 ## Các tính năng chính
-
+*   Tự động thu thập dữ liệu bất động sản từ các nguồn web và lưu vào MongoDB để phục vụ cho pipeline xử lý và huấn luyện mô hình.
 *   Giao diện web để nhập thông tin và nhận dự đoán giá nhà.
 *   API endpoint để dự đoán giá theo chương trình.
-*   Quy trình xử lý dữ liệu: làm sạch và tính toán các đặc trưng (ví dụ: khoảng cách).
-*   Huấn luyện mô hình hồi quy tuyến tính sử dụng PySpark.
-*   Lưu trữ dữ liệu bất động sản và lịch sử dự đoán bằng MongoDB.
-*   Luồng xử lý dữ liệu thời gian thực với Apache Kafka (consumer được cung cấp, producer cần được thiết lập riêng, ví dụ: từ các script cào dữ liệu).
-
+*   Quy trình xử lý dữ liệu: làm sạch và tính toán các đặc trưng
+*   Huấn luyện mô hình sử dụng PySpark.
+*   Luồng xử lý dữ liệu thời gian thực với Apache Kafka 
 
 ## Yêu cầu hệ thống
 
@@ -22,13 +23,10 @@ Dự án này là một ứng dụng web cho phép dự đoán giá bất độn
 ## Cài đặt
 
 1.  **Clone repository**
-    ```bash
-    git clone <your-repository-url>
-    cd real_estate2
-    ```
+    git clone <repository-url>
+
 
 2.  **Tạo và kích hoạt môi trường ảo:**
-    ```bash
     python -m venv venv
     # Trên Windows
     # venv\Scripts\activate
@@ -37,7 +35,7 @@ Dự án này là một ứng dụng web cho phép dự đoán giá bất độn
     ```
 
 3.  **Cài đặt các thư viện cần thiết:**
-    ```bash
+
     pip install -r requirements.txt
     ```
 
@@ -51,17 +49,21 @@ Dự án này là một ứng dụng web cho phép dự đoán giá bất độn
 
 ## Quy trình vận hành
 
-### 1. Chuẩn bị dữ liệu và Huấn luyện mô hình
+### 1. Thu thập dữ liệu với Scraper
+
+Chạy script scraper để tự động thu thập dữ liệu bất động sản và lưu vào MongoDB:
+Script này sẽ lấy dữ liệu từ các nguồn web, xử lý sơ bộ và lưu vào database để phục vụ các bước tiếp theo như làm sạch, huấn luyện mô hình.
+
+### 2. Chuẩn bị dữ liệu và Huấn luyện mô hình
 
 a.  **(Tùy chọn) Làm sạch dữ liệu trong MongoDB:**
     Nếu bạn có dữ liệu thô trong MongoDB cần được làm sạch (ví dụ: tính khoảng cách, trích xuất quận), chạy script:
     ```bash
     python data_processing/clean_data.py
     ```
-    Script này sẽ đọc dữ liệu từ collection `test` trong database `real_estate` của MongoDB, tính toán khoảng cách đến Hoàn Kiếm và trích xuất quận, sau đó cập nhật lại các bản ghi.
 
 b.  **Huấn luyện mô hình:**
-    Chạy script để huấn luyện mô hình hồi quy tuyến tính bằng PySpark. Script này đọc dữ liệu từ MongoDB (collection `properties2`, database `real_estate`).
+    Chạy script để huấn luyện mô hình dự đoán bằng PySpark. Script này đọc dữ liệu từ MongoDB.
     ```bash
     python data_processing/train_model.py
     ```
@@ -73,15 +75,13 @@ c.  **Trích xuất tham số mô hình (cho `app.py`):**
     python data_processing/export_model_params.py
     ```
 
-### 2. Luồng dữ liệu Kafka 
+### 3. Luồng dữ liệu Kafka 
 
 a.  **Chạy Kafka Consumer:**
 
 b.  **Chạy Kafka Producer:**
 
-### 3. Chạy ứng dụng Web Flask
-
-Dự án cung cấp hai phiên bản ứng dụng Flask:
+### 4. Chạy api Web Flask
 
 a.  **`app2.py` (Sử dụng NumPy và `model_params.json`):**
     Ứng dụng này tải các tham số mô hình từ `output/model_params.json` và thực hiện dự đoán bằng NumPy.
@@ -94,7 +94,7 @@ Sau khi chạy ứng dụng trên, truy cập vào `http://127.0.0.1:5000/` tron
 ## API Endpoints
 
 Ứng dụng Flask (`app.py`) cung cấp api endpoint dự đoán
-        ```
+        
 
 ## Công nghệ sử dụng
 
@@ -102,7 +102,4 @@ Sau khi chạy ứng dụng trên, truy cập vào `http://127.0.0.1:5000/` tron
 *   **Machine Learning:** PySpark (Spark MLlib), NumPy
 *   **Database:** MongoDB (sử dụng Pymongo và Mongo Spark Connector)
 *   **Data Streaming:** Apache Kafka (sử dụng kafka-python)
-*   **Frontend:** HTML, CSS (Bootstrap 5), JavaScript
-*   **Thư viện khác:** requests (để gọi API geocoding)
-
-
+*   **Frontend:** HTML, CSS 
